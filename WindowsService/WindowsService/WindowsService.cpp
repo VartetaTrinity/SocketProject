@@ -1,7 +1,11 @@
 #include <Windows.h>
 #include <iostream>
 #include <fstream>
+#include <time.h>
+
 using namespace std;
+
+#define MAX_TIME_LEN 26
 
 SERVICE_STATUS        g_ServiceStatus = { 0 };
 SERVICE_STATUS_HANDLE g_StatusHandle = NULL;
@@ -15,10 +19,23 @@ DWORD WINAPI __ServiceWorkerThread(LPVOID lpParam);
 ofstream oLogFile("C:/ServiceLog/WinSvcSocketServiceLog.txt", ios::app);
 int err = 0;
 
+const char* GiveCurTimestamp()
+{
+    time_t curTime;
+    time(&curTime);
+    char sTimeBuff[26] = { 0, };
+
+    ctime_s(sTimeBuff, 26, &curTime);
+    char* st = new char[30];
+    strcpy_s(st, 26, sTimeBuff);
+    return st;
+}
+
 int main()
 {
-    oLogFile << endl <<__LINE__<< ":The service main function called";
-    
+    const char* sTime = GiveCurTimestamp();
+    oLogFile << endl << sTime <<":"<<__LINE__<< ":The service main function called";
+    delete[]sTime;
 
     SERVICE_TABLE_ENTRY ServiceTable[] =
     {
@@ -29,7 +46,9 @@ int main()
     if (StartServiceCtrlDispatcher(ServiceTable) == FALSE)
     {
         err = GetLastError();
-        oLogFile << endl<< __LINE__<< ":The service dispatcher failed. Error:" << err;
+        sTime = GiveCurTimestamp();
+        oLogFile << endl<<sTime<<":"<< __LINE__ << ":The service dispatcher failed. Error:" << err;
+        delete[]sTime;
         return err;
     }
     return 0;
@@ -39,14 +58,16 @@ int main()
 VOID WINAPI __ServiceMain(DWORD argc, LPTSTR* argv)
 {
     DWORD Status = E_FAIL;
-
+    const char* sTime = NULL;
     // Register our service control handler with the SCM
     g_StatusHandle = RegisterServiceCtrlHandler("RealTimeUpdateService", __ServiceControlHandler);
 
     if (g_StatusHandle == NULL)
     {
         err = GetLastError();
-        oLogFile << endl <<__LINE__<< ":The RegisterServiceCtrlHandler failed. Returning..Error:" << err;
+        sTime = GiveCurTimestamp();
+        oLogFile << endl <<sTime<< ":"<<__LINE__ << ":The RegisterServiceCtrlHandler failed. Returning..Error:" << err;
+        delete[]sTime;
         return;
     }
 
@@ -63,7 +84,9 @@ VOID WINAPI __ServiceMain(DWORD argc, LPTSTR* argv)
     {
         //Log error somewhere in log file
         err = GetLastError();
-        oLogFile << endl <<__LINE__<< ":The SetServiceStatus failed to start the service. Returning..Error:" << err;
+        sTime = GiveCurTimestamp();
+        oLogFile << endl << sTime << ":"<< __LINE__<<":The SetServiceStatus failed to start the service. Returning..Error:" << err;
+        delete[]sTime;
     }
 
     /*
@@ -85,7 +108,9 @@ VOID WINAPI __ServiceMain(DWORD argc, LPTSTR* argv)
         {
             //Log to some log file for tracking purposes
             err = GetLastError();
-            oLogFile << endl << __LINE__ << ":The SetServiceStatus failed to stop the service. Returning..Error:" << err;
+            sTime = GiveCurTimestamp();
+            oLogFile << endl << sTime << ":" << __LINE__ << ":The SetServiceStatus failed to stop the service. Returning..Error:" << err;
+            delete[]sTime;
         }
         return;
     }
@@ -100,7 +125,9 @@ VOID WINAPI __ServiceMain(DWORD argc, LPTSTR* argv)
     {
         //Log to some file for tracking purposes
         err = GetLastError();
-        oLogFile << endl << __LINE__ << ":The SetServiceStatus failed to update he service status to Running. Returning..Error:" << err;
+        sTime = GiveCurTimestamp();
+        oLogFile << endl << sTime << ":" << __LINE__ << ":The SetServiceStatus failed to update he service status to Running. Returning..Error:" << err;
+        delete[]sTime;
     }
 
     // Start a thread that will perform the main task of the service
@@ -108,7 +135,9 @@ VOID WINAPI __ServiceMain(DWORD argc, LPTSTR* argv)
     if (hThread == NULL)
     {
         err = GetLastError();
-        oLogFile << endl << __LINE__ << ":Unable to start the Worker Thread. Error:" << err;
+        sTime = GiveCurTimestamp();
+        oLogFile << endl << sTime << ":" << __LINE__ << ":Unable to start the Worker Thread. Error:" << err;
+        delete[]sTime;
         return;
     }
 
@@ -117,7 +146,9 @@ VOID WINAPI __ServiceMain(DWORD argc, LPTSTR* argv)
     if (dw == WAIT_ABANDONED)
     {
         err = GetLastError();
-        oLogFile << endl << __LINE__ << ":The WairForSingleObject failed.. Returning..Error:" << err;
+        sTime = GiveCurTimestamp();
+        oLogFile << endl << sTime << ":" << __LINE__ << ":The WairForSingleObject failed.. Returning..Error:" << err;
+        delete[]sTime;
         return;
     }
 
@@ -138,15 +169,20 @@ VOID WINAPI __ServiceMain(DWORD argc, LPTSTR* argv)
     {
         //Log to some file for debug purposes
         err = GetLastError();
-        oLogFile << endl << __LINE__ << ":The SetServiceStatus failed to stop the service. Returning..Error:" << err;
+        sTime = GiveCurTimestamp();
+        oLogFile << endl << sTime << ":" << __LINE__ << ":The SetServiceStatus failed to stop the service. Returning..Error:" << err;
+        delete[]sTime;
     }
 
-    oLogFile << endl << "Service has been stopped";
+    sTime = GiveCurTimestamp();
+    oLogFile << endl << sTime << ":" << __LINE__ << "Service has been stopped";
+    delete[]sTime;
     oLogFile.close();
 }
 
 VOID WINAPI __ServiceControlHandler(DWORD CtrlCode)
 {
+    const char* sTime = NULL;
     switch (CtrlCode)
     {
     case SERVICE_CONTROL_STOP:
@@ -163,13 +199,17 @@ VOID WINAPI __ServiceControlHandler(DWORD CtrlCode)
         g_ServiceStatus.dwWin32ExitCode = 0;
         g_ServiceStatus.dwCheckPoint = 4;
 
-        oLogFile << endl << __LINE__ << ":Got the request to stop the service..";
+        sTime = GiveCurTimestamp();
+        oLogFile << endl << sTime << ":" << __LINE__ << ":Got the request to stop the service..";
+        delete[]sTime;
 
         if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE)
         {
             //Log to some file for debug purposes 
             err = GetLastError();
-            oLogFile << endl << __LINE__ << ":The SetServiceStatus failed to stop_pending the service. Returning..Error:" << err;
+            sTime = GiveCurTimestamp();
+            oLogFile << endl << sTime << ":" << __LINE__ << ":The SetServiceStatus failed to stop_pending the service. Returning..Error:" << err;
+            delete sTime;
         }
 
         // This will signal the worker thread to start shutting down
@@ -183,18 +223,23 @@ VOID WINAPI __ServiceControlHandler(DWORD CtrlCode)
 }
 
 DWORD WINAPI __ServiceWorkerThread(LPVOID lpParam)
-{    
+{ 
+    const char* sTime = NULL;
     //  Periodically check if the service has been requested to stop
     while (WaitForSingleObject(g_ServiceStopEvent, 0) != WAIT_OBJECT_0)
     {
         /*
          * Perform main service function here
          */
-        oLogFile << endl << __LINE__ << ":I'm Alive...";
+        sTime = GiveCurTimestamp();
+        oLogFile << endl << sTime << ":" << __LINE__ << ":I'm Alive...";
+        delete[]sTime;
         Sleep(2000);
     }
     
-    oLogFile << endl << __LINE__ << ":The worker thread is stopping now..";
+    sTime = GiveCurTimestamp();
+    oLogFile << endl << sTime << ":" << __LINE__ << ":The worker thread is stopping now..";
+    delete[]sTime;
 
     return ERROR_SUCCESS;
 }
