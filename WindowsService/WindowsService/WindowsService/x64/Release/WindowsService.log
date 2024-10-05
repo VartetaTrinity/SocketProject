@@ -1,0 +1,13 @@
+﻿  WindowsService.cpp
+C:\Vikash\Video To Upload\Varteta Learning Platform\Projects\SocketProject\WindowsService\WindowsService\WindowsService.cpp(42,17): error C2440: 'initializing': cannot convert from 'char *' to 'LPWSTR'
+  C:\Vikash\Video To Upload\Varteta Learning Platform\Projects\SocketProject\WindowsService\WindowsService\WindowsService.cpp(42,17):
+  Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+  
+C:\Vikash\Video To Upload\Varteta Learning Platform\Projects\SocketProject\WindowsService\WindowsService\WindowsService.cpp(63,22): error C2664: 'SERVICE_STATUS_HANDLE RegisterServiceCtrlHandlerW(LPCWSTR,LPHANDLER_FUNCTION)': cannot convert argument 1 from 'const char [22]' to 'LPCWSTR'
+  C:\Vikash\Video To Upload\Varteta Learning Platform\Projects\SocketProject\WindowsService\WindowsService\WindowsService.cpp(63,49):
+  Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\um\winsvc.h(1559,1):
+  see declaration of 'RegisterServiceCtrlHandlerW'
+  C:\Vikash\Video To Upload\Varteta Learning Platform\Projects\SocketProject\WindowsService\WindowsService\WindowsService.cpp(63,22):
+  while trying to match the argument list '(const char [22], overloaded-function)'
+  

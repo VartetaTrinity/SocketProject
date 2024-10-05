@@ -3,6 +3,10 @@
 #include <fstream>
 #include <time.h>
 
+//TODO - Need to make it modular for better maintenance and management of the code.
+//Need to put the code for logging in a different library and call from any other module
+//Need to put the code for socket in other header and source files and use it here to run as server
+
 using namespace std;
 
 #define MAX_TIME_LEN 26
