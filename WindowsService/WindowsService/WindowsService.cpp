@@ -214,7 +214,7 @@ VOID WINAPI __ServiceControlHandler(DWORD CtrlCode)
 DWORD WINAPI __ServiceWorkerThread(LPVOID lpParam)
 { 
     const char* sTime = NULL;
-    //  Periodically check if the service has been requested to stop
+    //Periodically check if the service has been requested to stop
     while (WaitForSingleObject(g_ServiceStopEvent, 0) != WAIT_OBJECT_0)
     {
         /*
