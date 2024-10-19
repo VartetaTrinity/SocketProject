@@ -24,23 +24,11 @@ DWORD WINAPI __ServiceWorkerThread(LPVOID lpParam);
 CommonLogger* pLogger = CommonLogger::GetLogger();
 int err = 0;
 
-const char* GiveCurTimestamp()
-{
-    time_t curTime;
-    time(&curTime);
-    char sTimeBuff[26] = { 0, };
-
-    ctime_s(sTimeBuff, 26, &curTime);
-    char* st = new char[30];
-    strcpy_s(st, 26, sTimeBuff);
-    return st;
-}
-
 char strMessage[1024] = { 0, };
 const char* sTime = NULL;
 
 #define FORMAT_LOG_MESSAGE(s) \
-    sTime = GiveCurTimestamp(); \
+    sTime = pLogger->GiveCurTimestamp(); \
     sprintf_s(strMessage, "%s | %d | %s", (char*)sTime, __LINE__, s); \
     delete[]sTime; \
     pLogger->LogMessage(strMessage);
@@ -48,7 +36,7 @@ const char* sTime = NULL;
 int main()
 {
     FORMAT_LOG_MESSAGE("The Service Main function called");
-
+    
     SERVICE_TABLE_ENTRY ServiceTable[] =
     {
         {(char*)"RealTimeUpdateService", (LPSERVICE_MAIN_FUNCTION)__ServiceMain},

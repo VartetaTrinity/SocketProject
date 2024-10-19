@@ -3,6 +3,15 @@
 #include <SocketCommunication.h>
 
 using namespace std;
+extern const char* sTime;
+extern CommonLogger* pLogger;
+extern char strMessage[1024];
+
+#define FORMAT_LOG_MESSAGE(s) \
+    sTime = pLogger->GiveCurTimestamp(); \
+    sprintf_s(strMessage, "%s | %d | %s", (char*)sTime, __LINE__, s); \
+    delete[]sTime; \
+    pLogger->LogMessage(strMessage);
 
 SocketComm::SocketComm()
 {
@@ -28,14 +37,14 @@ void SocketComm::AcceptNewConnection()
 	}
 	if (nIndex == 4)
 	{
-		cout << endl << "Server Busy..";
+		FORMAT_LOG_MESSAGE("Server Busy..");
 		return;
 	}
 
 	int nCliSocket = accept(nListenerSocket, NULL, NULL);
 	if (nCliSocket < 0)
 	{
-		cout << endl << "Failed to accept a new client..";
+		FORMAT_LOG_MESSAGE("Failed to accept a new client..");
 		return;
 	}
 	nClientSocket[nAvailIndex] = nCliSocket;
@@ -48,7 +57,7 @@ void SocketComm::RecvSendClientMsg(int nCliSocket)
 	int err = recv(nCliSocket, sBuff, 255, 0);
 	if (err < 0)
 	{
-		cout << endl << "Error at client socket:" << nCliSocket;
+		FORMAT_LOG_MESSAGE("Error at client socket");
 		closesocket(nCliSocket);
 		for (int nIndex = 0; nIndex < 5; nIndex++)
 		{
@@ -69,7 +78,7 @@ void SocketComm::RecvSendClientMsg(int nCliSocket)
 		err = send(nCliSocket, "ACK FROM SERVER", 16, 0);
 		if (err < 0)
 		{
-			cout << endl << "Error at client socket:" << nCliSocket;
+			FORMAT_LOG_MESSAGE("Error at client socket:");
 			closesocket(nCliSocket);
 			for (int nIndex = 0; nIndex < 5; nIndex++)
 			{
@@ -93,11 +102,11 @@ int SocketComm::StartSocketServer()
 	int err = WSAStartup(MAKEWORD(2, 2), &ws);
 	if (err == 0)
 	{
-		cout << endl << "Successfully Initialized socket LIB";
+		FORMAT_LOG_MESSAGE("Successfully Initialized socket LIB");
 	}
 	else if (err == -1)
 	{
-		cout << endl << "Not initialized the SOCKET API..";
+		FORMAT_LOG_MESSAGE("Not initialized the SOCKET API..");
 		return EXIT_FAILURE;
 	}
 
@@ -106,11 +115,11 @@ int SocketComm::StartSocketServer()
 		IPPROTO_TCP);
 	if (nListenerSocket < 0)
 	{
-		cout << endl << "The socket failed to open..";
+		FORMAT_LOG_MESSAGE("The socket failed to open..");
 	}
 	else
 	{
-		cout << endl << "Socket opened successfully..";
+		FORMAT_LOG_MESSAGE("Socket opened successfully..");
 	}
 
 	//Set the socket options
@@ -119,11 +128,11 @@ int SocketComm::StartSocketServer()
 		SO_REUSEADDR, (const char*)&optval, sizeof(optval));
 	if (err < 0)
 	{
-		cout << endl << "Not able to set the socket options.";
+		FORMAT_LOG_MESSAGE("Not able to set the socket options.");
 	}
 	else
 	{
-		cout << endl << "Succefully set the socket options.";
+		FORMAT_LOG_MESSAGE("Succefully set the socket options.");
 	}
 
 
@@ -135,11 +144,11 @@ int SocketComm::StartSocketServer()
 		&nMode);
 	if (err < 0)
 	{
-		cout << endl << "The ioctlsocket failed..";
+		FORMAT_LOG_MESSAGE("The ioctlsocket failed..");
 	}
 	else
 	{
-		cout << endl << "Socket Mode set to blocking..";
+		FORMAT_LOG_MESSAGE("Socket Mode set to blocking..");
 	}
 
 	//Bind the server code to a port
@@ -153,22 +162,22 @@ int SocketComm::StartSocketServer()
 		sizeof(srv));
 	if (err < 0)
 	{
-		cout << endl << "Failed to bind to local port..";
+		FORMAT_LOG_MESSAGE("Failed to bind to local port..");
 	}
 	else
 	{
-		cout << endl << "Bind to local port successfully..";
+		FORMAT_LOG_MESSAGE("Bind to local port successfully..");
 	}
 
 	//Listen and accept the new connection from client
 	err = listen(nListenerSocket, 5);
 	if (err < 0)
 	{
-		cout << endl << "Not able to listen..";
+		FORMAT_LOG_MESSAGE("Not able to listen..");
 	}
 	else
 	{
-		cout << endl << "Started Listening to the port..";
+		FORMAT_LOG_MESSAGE("Started Listening to the port..");
 	}
 
 
@@ -217,11 +226,11 @@ int SocketComm::StartSocketServer()
 		else if (err == 0)
 		{
 			//No one conneting / sending message
-			cout << endl << "No new connection/message..";
+			FORMAT_LOG_MESSAGE("No new connection/message..");
 		}
 		else
 		{
-			cout << endl << "Failed select!! closing the server";
+			FORMAT_LOG_MESSAGE("Failed select!! closing the server");
 			return (EXIT_FAILURE);
 		}
 	}

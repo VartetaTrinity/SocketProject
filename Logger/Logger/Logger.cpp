@@ -25,6 +25,18 @@ void CommonLogger::LogMessage(const char* sMsg)
 	(*oLogFile).flush();
 }
 
+const char* CommonLogger::GiveCurTimestamp()
+{
+	time_t curTime;
+	time(&curTime);
+	char sTimeBuff[26] = { 0, };
+
+	ctime_s(sTimeBuff, 26, &curTime);
+	char* st = new char[30];
+	strcpy_s(st, 26, sTimeBuff);
+	return st;
+}
+
 CommonLogger* CommonLogger::GetLogger()
 {
 	if (m_pLogger == NULL)

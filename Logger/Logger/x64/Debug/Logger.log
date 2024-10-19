@@ -1,5 +1,5 @@
 ﻿  pch.cpp
   Logger.cpp
-C:\Vikash\SocketProject\Logger\Logger\Logger.cpp(40): warning C4715: 'CommonLogger::GetLogger': not all control paths return a value
+C:\Vikash\SocketProject\Logger\Logger\Logger.cpp(52): warning C4715: 'CommonLogger::GetLogger': not all control paths return a value
 C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(1574,5): warning MSB8012: TargetPath(C:\Vikash\SocketProject\Logger\x64\Debug\Logger.lib) does not match the Library's OutputFile property value (C:\Vikash\SocketProject\Lib\Logger.lib). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Lib.OutputFile).
   Logger.vcxproj -> C:\Vikash\SocketProject\Logger\x64\Debug\Logger.lib

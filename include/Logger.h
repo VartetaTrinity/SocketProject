@@ -19,6 +19,7 @@ public:
 	static CommonLogger* GetLogger();
 
 	void LogMessage(const char* sMsg);
+	const char* GiveCurTimestamp();
 
 	~CommonLogger();
 
