@@ -1,12 +1,9 @@
+#include <SocketCommunication.h>
 #include <Windows.h>
 #include <Logger.h>
 #include <iostream>
 #include <fstream>
 #include <time.h>
-
-//TODO - Need to make it modular for better maintenance and management of the code.
-//Need to put the code for logging in a different library and call from any other module
-//Need to put the code for socket in other header and source files and use it here to run as server
 
 using namespace std;
 
@@ -15,6 +12,9 @@ using namespace std;
 SERVICE_STATUS        g_ServiceStatus = { 0 };
 SERVICE_STATUS_HANDLE g_StatusHandle = NULL;
 HANDLE                g_ServiceStopEvent = INVALID_HANDLE_VALUE;
+HANDLE                g_SocketThread = NULL;
+BOOL                  b_SokectSuccess = FALSE;
+CRITICAL_SECTION      g_CS;
 
 VOID WINAPI __ServiceMain(DWORD argc, LPTSTR* argv);
 VOID WINAPI __ServiceControlHandler(DWORD);
@@ -53,6 +53,32 @@ int main()
 }
 
 
+//Start the socket communication thread
+void StartSocketCommunication()
+{
+    SocketComm* pSockComm = new SocketComm();
+    int nRet = pSockComm->StartSocketServer();
+    if (nRet == EXIT_FAILURE)
+    {
+        FORMAT_LOG_MESSAGE("The thread for socket communication not started");
+        // Error creating event
+        // Tell service controller we are stopped and exit
+        g_ServiceStatus.dwControlsAccepted = 0;
+        g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
+        g_ServiceStatus.dwWin32ExitCode = GetLastError();
+        g_ServiceStatus.dwCheckPoint = 1;
+
+        if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE)
+        {
+            //Log to some log file for tracking purposes
+            err = GetLastError();
+            FORMAT_LOG_MESSAGE("The SetServiceStatus failed to stop the service");
+        }
+        ExitThread(nRet);
+    }
+}
+
+
 VOID WINAPI __ServiceMain(DWORD argc, LPTSTR* argv)
 {
     DWORD Status = E_FAIL;
@@ -83,9 +109,28 @@ VOID WINAPI __ServiceMain(DWORD argc, LPTSTR* argv)
         FORMAT_LOG_MESSAGE("The SetServiceStatus failed to start the service")
     }
 
-    /*
-     * Perform tasks necessary to start the service here
-     */
+    //Create the thread to start the socket communication
+   
+    g_SocketThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)StartSocketCommunication, NULL, 0, NULL);
+    //Wait till we get a confirmation about the socket server started successfully
+    if (g_SocketThread == NULL)
+    {
+        FORMAT_LOG_MESSAGE("The thread for socket communication not started");
+        // Error creating event
+        // Tell service controller we are stopped and exit
+        g_ServiceStatus.dwControlsAccepted = 0;
+        g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
+        g_ServiceStatus.dwWin32ExitCode = GetLastError();
+        g_ServiceStatus.dwCheckPoint = 1;
+
+        if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE)
+        {
+            //Log to some log file for tracking purposes
+            err = GetLastError();
+            FORMAT_LOG_MESSAGE("The SetServiceStatus failed to stop the service");
+        }
+        return;
+    }
 
      // Create a service stop event to wait on later
     g_ServiceStopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -199,19 +244,13 @@ VOID WINAPI __ServiceControlHandler(DWORD CtrlCode)
     }
 }
 
+
 DWORD WINAPI __ServiceWorkerThread(LPVOID lpParam)
 { 
-    const char* sTime = NULL;
     //Periodically check if the service has been requested to stop
-    while (WaitForSingleObject(g_ServiceStopEvent, 0) != WAIT_OBJECT_0)
-    {
-        /*
-         * Perform main service function here
-         */
-        FORMAT_LOG_MESSAGE("I'm Alive...");
-        Sleep(2000);
-    }
-    
+    //TODO-1: Need to remove this loop and the message inside.
+    WaitForSingleObject(g_ServiceStopEvent, INFINITE);
+        
     FORMAT_LOG_MESSAGE("The worker thread is stopping now..");
     return ERROR_SUCCESS;
 }

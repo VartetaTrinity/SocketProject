@@ -116,6 +116,7 @@ int SocketComm::StartSocketServer()
 	if (nListenerSocket < 0)
 	{
 		FORMAT_LOG_MESSAGE("The socket failed to open..");
+		return EXIT_FAILURE;
 	}
 	else
 	{
@@ -129,6 +130,7 @@ int SocketComm::StartSocketServer()
 	if (err < 0)
 	{
 		FORMAT_LOG_MESSAGE("Not able to set the socket options.");
+		return EXIT_FAILURE;
 	}
 	else
 	{
@@ -145,6 +147,7 @@ int SocketComm::StartSocketServer()
 	if (err < 0)
 	{
 		FORMAT_LOG_MESSAGE("The ioctlsocket failed..");
+		return EXIT_FAILURE;
 	}
 	else
 	{
@@ -163,6 +166,7 @@ int SocketComm::StartSocketServer()
 	if (err < 0)
 	{
 		FORMAT_LOG_MESSAGE("Failed to bind to local port..");
+		return EXIT_FAILURE;
 	}
 	else
 	{
@@ -174,6 +178,7 @@ int SocketComm::StartSocketServer()
 	if (err < 0)
 	{
 		FORMAT_LOG_MESSAGE("Not able to listen..");
+		return EXIT_FAILURE;
 	}
 	else
 	{
