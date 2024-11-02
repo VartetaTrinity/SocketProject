@@ -1,7 +1,7 @@
 #include <iostream>
 #include <WinSock2.h>
 
-#define PORT 9999
+#define PORT 19999
 
 class SocketComm
 {

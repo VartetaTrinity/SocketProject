@@ -15,7 +15,11 @@ extern char strMessage[1024];
 
 SocketComm::SocketComm()
 {
-
+	nListenerSocket = -1;
+	for (int nIndex = 0; nIndex < 5; nIndex++)
+	{
+		nClientSocket[nIndex] = 0;
+	}
 }
 
 SocketComm::~SocketComm()
@@ -111,8 +115,7 @@ int SocketComm::StartSocketServer()
 	}
 
 	//IPV4, IPV6
-	nListenerSocket = socket(AF_INET, SOCK_STREAM,
-		IPPROTO_TCP);
+	nListenerSocket = socket(AF_INET, SOCK_STREAM,IPPROTO_TCP);
 	if (nListenerSocket < 0)
 	{
 		FORMAT_LOG_MESSAGE("The socket failed to open..");
